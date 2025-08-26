@@ -40,6 +40,25 @@ export function useAuth() {
         emailRedirectTo: undefined,
       },
     });
+    
+    // If signup was successful and user was created, complete the signup process
+    if (data.user && !error) {
+      try {
+        // Complete the user signup process (creates profile, preferences, categories)
+        const { data: signupResult, error: signupError } = await supabase.rpc('complete_user_signup', {
+          user_uuid: data.user.id
+        });
+        
+        if (signupError) {
+          console.warn('Failed to complete user signup:', signupError);
+        } else if (signupResult) {
+          console.log('User signup completed:', signupResult);
+        }
+      } catch (signupErr) {
+        console.warn('Error completing user signup:', signupErr);
+      }
+    }
+    
     return { data, error };
   };
 

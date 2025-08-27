@@ -104,23 +104,13 @@ export function LoginForm() {
         </button>
       </div>
 
-      <div className="text-center space-y-2">
-        <div>
-          <span className="text-sm text-gray-600">
-            Don't have an account?{' '}
-            <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500">
-              Sign up here
-            </Link>
-          </span>
-        </div>
-        <div>
-          <span className="text-sm text-gray-600">
-            Admin?{' '}
-            <Link to="/admin/login" className="font-medium text-blue-600 hover:text-blue-500">
-              Sign in as admin
-            </Link>
-          </span>
-        </div>
+      <div className="text-center">
+        <span className="text-sm text-gray-600">
+          Don't have an account?{' '}
+          <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500">
+            Sign up here
+          </Link>
+        </span>
       </div>
     </form>
   );

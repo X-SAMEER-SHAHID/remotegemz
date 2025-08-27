@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, Upload, Loader2, ClipboardList } from 'lucide-react';
+import React, { useState } from 'react';
+import { Plus, Upload, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useWorkEntries } from '../hooks/useWorkEntries';
-import { supabase } from '../lib/supabase';
 
 interface WorkEntryFormProps {
   onDateChange?: (date: string) => void;
@@ -19,57 +18,8 @@ export function WorkEntryForm({ onDateChange }: WorkEntryFormProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [tasks, setTasks] = useState<Array<{id: string, title: string, team_name: string}>>([]);
-  const [selectedTask, setSelectedTask] = useState<string>('');
-  const [isDeveloper, setIsDeveloper] = useState(false);
   
   const { addEntry, uploadScreenshot } = useWorkEntries();
-
-  // Check if user is a developer and fetch their tasks
-  useEffect(() => {
-    checkUserRole();
-  }, []);
-
-  const checkUserRole = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        // Check if user is a team member
-        const { data: memberData } = await supabase
-          .from('team_members')
-          .select('id')
-          .eq('user_id', user.id)
-          .eq('is_active', true)
-          .single();
-
-        if (memberData) {
-          setIsDeveloper(true);
-          fetchUserTasks(user.id);
-        }
-      }
-    } catch (error) {
-      console.error('Error checking user role:', error);
-    }
-  };
-
-  const fetchUserTasks = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('tasks')
-        .select(`
-          id,
-          title,
-          teams(name)
-        `)
-        .eq('assigned_to', userId)
-        .in('status', ['pending', 'in_progress']);
-
-      if (error) throw error;
-      setTasks(data || []);
-    } catch (error) {
-      console.error('Error fetching tasks:', error);
-    }
-  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -106,7 +56,7 @@ export function WorkEntryForm({ onDateChange }: WorkEntryFormProps) {
       }
 
       // Add work entry
-      const { data: workEntry, error: addError } = await addEntry({
+      const { error: addError } = await addEntry({
         work_date: formData.work_date,
         work_time: formData.work_time,
         description: formData.description,
@@ -114,16 +64,6 @@ export function WorkEntryForm({ onDateChange }: WorkEntryFormProps) {
         commit_link: formData.commit_link || null,
         screenshot_url: screenshotUrl,
       });
-
-      // If user is a developer and selected a task, link the work entry to the task
-      if (isDeveloper && selectedTask && workEntry) {
-        await supabase
-          .from('task_work_entries')
-          .insert({
-            task_id: selectedTask,
-            work_entry_id: workEntry.id,
-          });
-      }
 
       if (addError) {
         throw new Error(addError.message);
@@ -201,31 +141,6 @@ export function WorkEntryForm({ onDateChange }: WorkEntryFormProps) {
             />
           </div>
         </div>
-
-        {isDeveloper && tasks.length > 0 && (
-          <div>
-            <label htmlFor="task" className="block text-sm font-medium text-gray-700 mb-1">
-              <ClipboardList className="inline h-4 w-4 mr-1" />
-              Related Task (Optional)
-            </label>
-            <select
-              id="task"
-              value={selectedTask}
-              onChange={(e) => setSelectedTask(e.target.value)}
-              className="w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="">Select a task (optional)</option>
-              {tasks.map((task) => (
-                <option key={task.id} value={task.id}>
-                  {task.title} - {task.teams?.name}
-                </option>
-              ))}
-            </select>
-            <p className="mt-1 text-sm text-gray-500">
-              Link this work entry to a specific task for better tracking
-            </p>
-          </div>
-        )}
 
         <div>
           <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">

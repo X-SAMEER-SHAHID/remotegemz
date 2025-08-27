@@ -5,9 +5,10 @@ import { useWorkEntries } from '../hooks/useWorkEntries';
 
 interface WorkEntryFormProps {
   onDateChange?: (date: string) => void;
+  onAdded?: () => void;
 }
 
-export function WorkEntryForm({ onDateChange }: WorkEntryFormProps) {
+export function WorkEntryForm({ onDateChange, onAdded }: WorkEntryFormProps) {
   const [formData, setFormData] = useState({
     work_date: format(new Date(), 'yyyy-MM-dd'),
     work_time: format(new Date(), 'HH:mm'),
@@ -89,6 +90,9 @@ export function WorkEntryForm({ onDateChange }: WorkEntryFormProps) {
       const fileInput = document.getElementById('screenshot') as HTMLInputElement;
       if (fileInput) fileInput.value = '';
 
+      // Notify parent to refresh lists
+      if (onAdded) onAdded();
+
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
@@ -98,7 +102,7 @@ export function WorkEntryForm({ onDateChange }: WorkEntryFormProps) {
 
   return (
     <div className="bg-white rounded-lg shadow p-6">
-      <div className="flex items-center space-x-2 mb-6">
+      <div className="flex items-center gap-2 mb-6">
         <Plus className="h-5 w-5 text-blue-600" />
         <h2 className="text-lg font-semibold text-gray-900">Add Programming Work</h2>
       </div>
@@ -110,7 +114,7 @@ export function WorkEntryForm({ onDateChange }: WorkEntryFormProps) {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label htmlFor="work_date" className="block text-sm font-medium text-gray-700 mb-1">
               Work Date *
@@ -154,7 +158,7 @@ export function WorkEntryForm({ onDateChange }: WorkEntryFormProps) {
             value={formData.description}
             onChange={handleInputChange}
             placeholder="e.g., User authentication system, Dashboard UI..."
-            className="w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+            className="w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 resize-y"
           />
         </div>
 
@@ -187,7 +191,7 @@ export function WorkEntryForm({ onDateChange }: WorkEntryFormProps) {
             value={formData.commit_link}
             onChange={handleInputChange}
             placeholder="https://github.com/user/repo/commit/..."
-            className="w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+            className="w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 break-all"
           />
         </div>
 
@@ -211,7 +215,7 @@ export function WorkEntryForm({ onDateChange }: WorkEntryFormProps) {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           {loading ? (
             <>

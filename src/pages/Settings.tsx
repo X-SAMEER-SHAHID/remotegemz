@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { ConfirmDialog } from '../components/ConfirmDialog';
 import { Settings as SettingsIcon, User, Shield, Database, Trash2, DollarSign } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useWorkEntries } from '../hooks/useWorkEntries';
@@ -9,6 +10,12 @@ export function Settings() {
   const { entries } = useWorkEntries();
   const { settings, updateSettings } = useSettings();
   const [loading, setLoading] = useState(false);
+  const [hourlyRateInput, setHourlyRateInput] = useState<number>(settings.hourlyRate);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  useEffect(() => {
+    setHourlyRateInput(settings.hourlyRate);
+  }, [settings.hourlyRate]);
 
   const handleDeleteAllData = async () => {
     const confirmed = window.confirm(
@@ -135,14 +142,23 @@ export function Settings() {
                 type="number"
                 min="0"
                 step="0.01"
-                value={settings.hourlyRate}
-                onChange={(e) => updateSettings({ hourlyRate: parseFloat(e.target.value) || 0 })}
+                value={hourlyRateInput}
+                onChange={(e) => setHourlyRateInput(parseFloat(e.target.value) || 0)}
                 className="w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
                 placeholder="50.00"
               />
               <p className="mt-1 text-sm text-gray-500">
                 This rate is used to calculate your earnings from work hours.
               </p>
+              <div className="mt-3">
+                <button
+                  onClick={() => setConfirmOpen(true)}
+                  disabled={hourlyRateInput === settings.hourlyRate}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Save Rate
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -208,6 +224,22 @@ export function Settings() {
           </div>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        title="Confirm Hourly Rate"
+        message={`Update hourly rate from $${settings.hourlyRate.toFixed(2)} to $${Number(hourlyRateInput || 0).toFixed(2)}?`}
+        confirmText="Update"
+        cancelText="Cancel"
+        onCancel={() => setConfirmOpen(false)}
+        onConfirm={async () => {
+          setConfirmOpen(false);
+          const newRate = Number(hourlyRateInput || 0);
+          if (!Number.isNaN(newRate)) {
+            await updateSettings({ hourlyRate: newRate });
+          }
+        }}
+      />
     </div>
   );
 }

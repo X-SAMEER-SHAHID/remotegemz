@@ -93,9 +93,10 @@ export function useWorkEntries() {
     const fileExt = file.name.split('.').pop();
     const fileName = `${Date.now()}.${fileExt}`;
     const filePath = `screenshots/${user.id}/${fileName}`;
+    const bucket = import.meta.env.VITE_SUPABASE_STORAGE_BUCKET || 'images';
 
     const { data, error } = await supabase.storage
-      .from('images')
+      .from(bucket)
       .upload(filePath, file);
 
     if (error) {
@@ -103,7 +104,7 @@ export function useWorkEntries() {
     }
 
     const { data: { publicUrl } } = supabase.storage
-      .from('images')
+      .from(bucket)
       .getPublicUrl(filePath);
 
     return { data: { publicUrl }, error: null };

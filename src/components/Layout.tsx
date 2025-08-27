@@ -37,30 +37,28 @@ export function Layout({ children }: LayoutProps) {
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <div className="bg-blue-600 p-2 rounded-lg">
-                  <Code2 className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-xl font-bold text-gray-900">Programming Work Tracker</h1>
-                  <p className="text-sm text-gray-500">Track your daily programming tasks & features</p>
-                </div>
+          <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center py-3 sm:py-0 sm:h-16">
+            <div className="flex items-center gap-3">
+              <div className="bg-blue-600 p-2 rounded-lg shrink-0">
+                <Code2 className="h-6 w-6 text-white" />
+              </div>
+              <div className="min-w-0">
+                <h1 className="text-lg sm:text-xl font-bold text-gray-900 truncate">Programming Work Tracker</h1>
+                <p className="text-xs sm:text-sm text-gray-500 truncate">Track your daily programming tasks & features</p>
               </div>
             </div>
-            
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2 text-gray-700">
-                <User className="h-4 w-4" />
-                <span className="text-sm">{user?.email}</span>
+
+            <div className="flex items-center justify-between sm:justify-end gap-2">
+              <div className="hidden md:flex items-center gap-2 text-gray-700 min-w-0">
+                <User className="h-4 w-4 shrink-0" />
+                <span className="text-xs sm:text-sm truncate max-w-[40vw] sm:max-w-xs">{user?.email}</span>
               </div>
               <button
                 onClick={handleSignOut}
-                className="flex items-center space-x-2 px-3 py-2 text-gray-700 hover:text-gray-900 transition-colors"
+                className="hidden md:flex items-center gap-2 px-2 py-1.5 sm:px-3 sm:py-2 text-gray-700 hover:text-gray-900 transition-colors border rounded-md sm:border-0 sm:rounded-none"
               >
                 <LogOut className="h-4 w-4" />
-                <span className="text-sm">Sign Out</span>
+                <span className="text-xs sm:text-sm">Sign Out</span>
               </button>
             </div>
           </div>
@@ -69,8 +67,8 @@ export function Layout({ children }: LayoutProps) {
 
       {/* Navigation */}
       <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex space-x-8">
+        <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
+          <div className="flex gap-4 overflow-x-auto no-scrollbar whitespace-nowrap">
             {navItems.map((item) => {
               const Icon = item.icon;
               return (
@@ -78,15 +76,15 @@ export function Layout({ children }: LayoutProps) {
                   key={item.path}
                   to={item.path}
                   className={({ isActive }) =>
-                    `flex items-center space-x-2 px-3 py-4 text-sm font-medium transition-colors border-b-2 ${
+                    `inline-flex items-center gap-2 px-2 sm:px-3 py-3 sm:py-4 text-sm font-medium transition-colors border-b-2 ${
                       isActive
                         ? 'border-blue-600 text-blue-600'
                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                     }`
                   }
                 >
-                  <Icon className="h-4 w-4" />
-                  <span>{item.label}</span>
+                  <Icon className="h-4 w-4 shrink-0" />
+                  <span className="truncate">{item.label}</span>
                 </NavLink>
               );
             })}
@@ -95,7 +93,7 @@ export function Layout({ children }: LayoutProps) {
       </nav>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8">
         {children}
       </main>
     </div>

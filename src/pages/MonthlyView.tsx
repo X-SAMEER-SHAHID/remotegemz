@@ -2,9 +2,15 @@ import React, { useState } from 'react';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, addMonths, subMonths } from 'date-fns';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { useWorkEntries } from '../hooks/useWorkEntries';
+import { TaskModal } from '../components/TaskModal';
+import { QuickAddForm } from '../components/QuickAddForm';
 
 export function MonthlyView() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
+  const [quickAddDate, setQuickAddDate] = useState<string | null>(null);
   const { entries, getEntriesForDate } = useWorkEntries();
 
   const monthStart = startOfMonth(currentMonth);
@@ -13,6 +19,34 @@ export function MonthlyView() {
 
   const previousMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
   const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
+
+  const handleDayClick = (date: Date) => {
+    const dateString = format(date, 'yyyy-MM-dd');
+    setSelectedDate(dateString);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedDate(null);
+  };
+
+  const handleQuickAdd = (date: Date) => {
+    const dateString = format(date, 'yyyy-MM-dd');
+    setQuickAddDate(dateString);
+    setIsQuickAddOpen(true);
+  };
+
+  const closeQuickAdd = () => {
+    setIsQuickAddOpen(false);
+    setQuickAddDate(null);
+  };
+
+  const handleQuickAddSuccess = () => {
+    closeQuickAdd();
+    // Refresh the calendar data
+    // The useWorkEntries hook will automatically update
+  };
 
   const getDayStats = (date: Date) => {
     const dateString = format(date, 'yyyy-MM-dd');
@@ -87,9 +121,10 @@ export function MonthlyView() {
           return (
             <div
               key={index}
-              className={`min-h-[120px] p-2 border-b border-r hover:bg-gray-50 transition-colors ${
+              className={`min-h-[120px] p-2 border-b border-r hover:bg-gray-50 transition-colors cursor-pointer ${
                 !isCurrentMonth ? 'bg-gray-50 text-gray-400' : ''
               } ${isToday ? 'bg-blue-50' : ''}`}
+              onClick={() => handleDayClick(date)}
             >
               <div className="flex justify-between items-start mb-2">
                 <span
@@ -100,7 +135,13 @@ export function MonthlyView() {
                   {format(date, 'd')}
                 </span>
                 {isCurrentMonth && (
-                  <button className="text-gray-400 hover:text-blue-600 transition-colors">
+                  <button 
+                    className="text-gray-400 hover:text-blue-600 transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleQuickAdd(date);
+                    }}
+                  >
                     <Plus className="h-4 w-4" />
                   </button>
                 )}
@@ -128,6 +169,24 @@ export function MonthlyView() {
           );
         })}
       </div>
+      
+      {/* Task Modal */}
+      {selectedDate && (
+        <TaskModal
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          selectedDate={selectedDate}
+        />
+      )}
+
+      {/* Quick Add Form */}
+      {quickAddDate && (
+        <QuickAddForm
+          selectedDate={quickAddDate}
+          onClose={closeQuickAdd}
+          onSuccess={handleQuickAddSuccess}
+        />
+      )}
     </div>
   );
 }
